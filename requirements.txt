@@ -1,4 +1,5 @@
 Pyrogram==1.2.9
+tgcrypto
 requests==2.25.1
 certifi==2018.11.29
 chardet==3.0.4
