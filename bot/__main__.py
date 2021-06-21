@@ -1,3 +1,24 @@
+r"""
+    _                _  _        
+   / \    _   _   __| |(_)  ___
+  / _ \  | | | | / _` || | / _ \
+ / ___ \ | |_| || (_| || || (_) |
+/_/   \_\ \__,_| \__,_||_| \___/
+     _____        _                       _
+    | ____|__  __| |_  _ __   __ _   ___ | |_   ___   _ __
+    |  _|  \ \/ /| __|| '__| / _` | / __|| __| / _ \ | '__|
+    | |___  >  < | |_ | |   | (_| || (__ | |_ | (_) || |
+    |_____|/_/\_\ \__||_|    \__,_| \___| \__| \___/ |_|
+                 ____          _
+                | __ )   ___  | |_
+                |  _ \  / _ \ | __|
+                | |_) || (_) || |_
+                |____/  \___/  \__|
+
+telegramChannel - t.me/IndianBots
+initialRelease - 21/06/21
+"""
+
 # Inbuilt
 from os import system as spawn, path, remove
 from threading import Thread
@@ -41,7 +62,7 @@ def downloadProgress(current, total, message):
     app.edit_message_text(
         message.chat.id,
         message.message_id,
-        f"Downloading - `{current}` **Chunks**",
+        f"Downloading - `{current}` **Bytes**",
         parse_mode="md",
     )
 
@@ -51,7 +72,7 @@ def uploadProgress(current, total, message):
         message.chat.id,
         message.message_id,
         f"Uploading -\n"
-        f"`{current}/{total}` **Chunks**\n"
+        f"`{current}/{total}` **Bytes**\n"
         f"Progress - {current * 100 / total:.1f}%✅",
         parse_mode="md",
     )
