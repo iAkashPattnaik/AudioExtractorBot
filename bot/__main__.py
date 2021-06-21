@@ -162,7 +162,7 @@ def extractAudio(_, message):
         remove(f"./extracted/{resultFile}.mp3")
         remove(f"{filePath}")
         remove(f"{fileThumb}")
-    except (Exception, ConnectionError) as error:
+    except Exception as error:
         print(error)
         app.send_message(message.chat.id, "Couldn't Extract The Audio From This File. Sorry!")
         Thread(target=delMessage(infoMessage)).start()
