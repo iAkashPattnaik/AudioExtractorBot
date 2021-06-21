@@ -20,7 +20,7 @@ initialRelease - 21/06/21
 """
 
 # Inbuilt
-from os import system as spawn, path, remove
+from os import mkdir, system as spawn, path, remove
 from threading import Thread
 
 # sitePackages
@@ -308,5 +308,8 @@ def commands(_, message):
     )
 
 
-print("Starting ...")
-app.run()
+if __name__ == "__main__":
+    print("Starting ...")
+    if not path.exists("./extracted"):
+        mkdir("./extracted")
+    app.run()
