@@ -24,6 +24,6 @@ relaunchDate - 3/5/23
 from os import environ
 
 class Config(object):
-    botToken: str | None = environ.get("botToken")
-    apiId: str | None = environ.get("apiId")
-    apiHash: str | None = environ.get("apiHash")
+    botToken: str = environ.get("botToken") # type: ignore
+    apiId: str = environ.get("apiId") # type: ignore
+    apiHash: str = environ.get("apiHash") # type: ignore
