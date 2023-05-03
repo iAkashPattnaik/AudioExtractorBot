@@ -15,14 +15,15 @@ r"""
                 | |_) || (_) || |_
                 |____/  \___/  \__|
 
-telegramChannel - t.me/IndianBots
+telegramChannel - telegram.dog/PhantomProjects
 initialRelease - 21/06/21
+relaunchDate - 3/5/23
 """
 
 # Inbuilt
 from os import environ
 
 class Config(object):
-    botToken: str = environ.get("botToken")
-    apiId: str = environ.get("apiId")
-    apiHash: str = environ.get("apiHash")
+    botToken: str | None = environ.get("botToken")
+    apiId: str | None = environ.get("apiId")
+    apiHash: str | None = environ.get("apiHash")

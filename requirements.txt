@@ -1,8 +1,8 @@
-Pyrogram==1.2.9
+Pyrogram
 tgcrypto
-requests==2.25.1
-certifi==2022.12.7
-chardet==3.0.4
-idna==2.8
-six==1.12.0
-urllib3==1.26.5
+requests
+certifi
+chardet
+idna
+six
+urllib3

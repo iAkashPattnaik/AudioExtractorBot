@@ -15,27 +15,28 @@ r"""
                 | |_) || (_) || |_
                 |____/  \___/  \__|
 
-telegramChannel - t.me/IndianBots
+telegramChannel - telegram.dog/PhantomProjects
 initialRelease - 21/06/21
+relaunchDate - 3/5/23
 """
 
 # Inbuilt
 from os import mkdir, system as spawn, path, remove
-from threading import Thread
+from typing import BinaryIO
 
 # sitePackages
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.enums import ParseMode
 
 # selfMade
 from config import Config
 
-
 app = Client(
     "AudioExtractorBot",
-    api_id=Config.apiId,
-    api_hash=Config.apiHash,
-    bot_token=Config.botToken,
+    api_id=Config.apiId, # type: ignore
+    api_hash=Config.apiHash, # type: ignore
+    bot_token=Config.botToken, # type: ignore
 )
 
 
@@ -51,47 +52,47 @@ def getFileSize(filePath: str):
         return f"{round(fileSize / 1099511627776, 2)} GB"
 
 
-def getThumbnail(thumbs: list):
+async def getThumbnail(thumbs: list) -> str | BinaryIO | None:
     if not len(thumbs) >= 1:
         return f"./bot/defaultThumb.jpg"
-    return app.download_media(thumbs[0].file_id)
+    return await app.download_media(thumbs[0].file_id)
 
 
-def downloadProgress(current, total, message):
+async def downloadProgress(current, total, message):
     del total
-    app.edit_message_text(
+    await app.edit_message_text(
         message.chat.id,
-        message.message_id,
+        message.id,
         f"Downloading - `{current}` **Bytes**",
-        parse_mode="md",
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 
-def uploadProgress(current, total, message):
-    app.edit_message_text(
+async def uploadProgress(current, total, message):
+    await app.edit_message_text(
         message.chat.id,
-        message.message_id,
+        message.id,
         f"Uploading -\n"
         f"`{current}/{total}` **Bytes**\n"
         f"Progress - {current * 100 / total:.1f}%✅",
-        parse_mode="md",
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 
-def delMessage(message):
+async def delMessage(message):
     try:
-        app.delete_messages(
+        await app.delete_messages(
             message.chat.id,
-            message.message_id,
+            message.id,
         )
     except Exception as _:
-        print(f"[Errno 0] Can't delete message: '{message.message_id}'")
+        print(f"[Errno 0] Can't delete message: '{message.id}'")
 
 
-def checkUserJoinStatus(user_id):
+async def checkUserJoinStatus(user_id):
     try:
-        channel = app.get_chat_member("IndianBots", user_id)
-        group = app.get_chat_member("IndianBotsChat", user_id)
+        channel = await app.get_chat_member("PhantomProjects", user_id)
+        group = await app.get_chat_member("PhantomProjectsGroup", user_id)
     except Exception as _:
         channel = False
         group = False
@@ -101,138 +102,137 @@ def checkUserJoinStatus(user_id):
 
 
 @app.on_message(filters.video or filters.video_note or filters.document)
-def extractAudio(_, message):
-    userjoinStatus = checkUserJoinStatus(message.from_user.id)
+async def extractAudio(_, message):
+    userjoinStatus = await checkUserJoinStatus(message.from_user.id)
     if not userjoinStatus:
-        return app.send_message(
+        return await app.send_message(
             message.chat.id,
             f"Sorry `{message.from_user.first_name}`,\n"
             f"I can't let you use me until you join both my **Channel** and **Group**.",
-            parse_mode="md",
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
                         text="🖥Channel💺",
-                        url="https://t.me/IndianBots",
+                        url="https://t.me/PhantomProjects",
                         ),
                 ],
                 [
                     InlineKeyboardButton(
                         text="🧬Group🚦",
-                        url="https://t.me/IndianBotsChat",
+                        url="https://t.me/PhantomProjectsGroup",
                     ),
                 ]
             ])
         )
-    infoMessage = app.send_message(
+    infoMessage = await app.send_message(
         message.chat.id,
         "Downloading - 0%",
-        reply_to_message_id=message.message_id,
+        reply_to_message_id=message.id,
     )
     try:
         _ = message.video
-        filePath = app.download_media(
+        filePath = await app.download_media(
             message.video.file_id,
             progress=downloadProgress,
             progress_args=(infoMessage,),
         )
-        resultFile = f"{message.from_user.id}-{message.message_id}"
-        spawn(f"ffmpeg -i {filePath} -f mp3 -ab 192000 -vn -loglevel quiet ./extracted/{resultFile}.mp3")
+        resultFile = f"{message.from_user.id}-{message.id}"
+        spawn(f"ffmpeg -i {filePath} -f mp3 -b:a 320k -vn -loglevel quiet ./extracted/{resultFile}.mp3")
         if not path.exists(f"./extracted/{resultFile}.mp3"):
-            return app.send_message(message.chat.id, "Couldn't Extract The Audio From This File. Sorry!")
+            return await app.send_message(message.chat.id, "Couldn't Extract The Audio From This File. Sorry!")
         fileSize = getFileSize(f"./extracted/{resultFile}.mp3")
-        fileThumb = getThumbnail(message.video.thumbs)
-        infoMessageUpload = app.send_message(
+        fileThumb = await getThumbnail(message.video.thumbs)
+        infoMessageUpload = await app.send_message(
             message.chat.id,
             "Uploading - 0%",
-            reply_to_message_id=message.message_id,
+            reply_to_message_id=message.id,
         )
-        app.send_audio(
+        await app.send_audio(
             message.chat.id,
             f"./extracted/{resultFile}.mp3",
-            caption=f"{fileSize} | 192 kbps | @IndianBots",
-            reply_to_message_id=message.message_id,
+            caption=f"`{fileSize}` | 320 kbps | @PhantomProjects",
+            reply_to_message_id=message.id,
             file_name=f"{message.video.file_name.split('.')[0]}",
-            thumb=fileThumb,
+            thumb=str(fileThumb),
             progress=uploadProgress,
             progress_args=(infoMessageUpload,),
+            parse_mode=ParseMode.MARKDOWN,
         )
-        Thread(target=delMessage(infoMessage)).start()
-        Thread(target=delMessage(infoMessageUpload)).start()
+        await delMessage(infoMessage)
+        await delMessage(infoMessageUpload)
         remove(f"./extracted/{resultFile}.mp3")
         remove(f"{filePath}")
         remove(f"{fileThumb}")
     except Exception as error:
         print(error)
-        app.send_message(message.chat.id, "Couldn't Extract The Audio From This File. Sorry!")
-        Thread(target=delMessage(infoMessage)).start()
-        Thread(target=delMessage(infoMessageUpload)).start()
+        await app.send_message(message.chat.id, "Couldn't Extract The Audio From This File. Sorry!\n\nPlease report this to @akashpattnaik personally")
+        await delMessage(infoMessage)
 
 
 @app.on_message(filters.command("start"))
-def startCommand(_, message):
-    userjoinStatus = checkUserJoinStatus(message.from_user.id)
+async def startCommand(_, message):
+    userjoinStatus = await checkUserJoinStatus(message.from_user.id)
     if not userjoinStatus:
-        return app.send_message(
+        return await app.send_message(
             message.chat.id,
             f"Sorry `{message.from_user.first_name}`,\n"
             f"I can't let you use me until you join both my **Channel** and **Group**.",
-            parse_mode="md",
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
                         text="🖥Channel💺",
-                        url="https://t.me/IndianBots",
+                        url="https://t.me/PhantomProjects",
                         ),
                 ],
                 [
                     InlineKeyboardButton(
                         text="🧬Group🚦",
-                        url="https://t.me/IndianBotsChat",
+                        url="https://t.me/PhantomProjectsGroup",
                     ),
                 ]
             ])
         )
-    app.send_message(
+    await app.send_message(
         message.chat.id,
         f"Hoi **{message.from_user.first_name}**!\n"
-        f"I hope you are pushing healty through the `Covid19 Pandemic.`\n"
-        f"I am a **Audio Extractor Bot** made by **@Akash_am1**, i extract audio from videos and send it to you.\n"
-        f"For help - /commands\n"
-        f"Acknowledgment -\n\n"
-        f"[Pyrogram](https://github.com/pyrogram/pyrogram)\n"
-        f"[FFmpeg](https://www.ffmpeg.org/)\n"
-        f"[Python](https://www.python.org/)",
+        f"I am a **Audio Extractor Bot** made by **@akashpattnaik**, I extract audio from videos and send it to you.\n"
+        f"For help - /commands\n\n"
+        f"Acknowledgment -\n"
+        f"[**Pyrogram**](https://github.com/pyrogram/pyrogram)\n"
+        f"[**FFmpeg**](https://www.ffmpeg.org/)\n"
+        f"[**Python**](https://www.python.org/)",
         disable_web_page_preview=True,
-        parse_mode='md',
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 
 @app.on_message(filters.command(["github", "source"]))
-def source_or_github(_, message):
-    userjoinStatus = checkUserJoinStatus(message.from_user.id)
+async def source_or_github(_, message):
+    userjoinStatus = await checkUserJoinStatus(message.from_user.id)
     if not userjoinStatus:
-        return app.send_message(
+        return await app.send_message(
             message.chat.id,
             f"Sorry `{message.from_user.first_name}`,\n"
             f"I can't let you use me until you join both my **Channel** and **Group**.",
-            parse_mode="md",
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
                         text="🖥Channel💺",
-                        url="https://t.me/IndianBots",
+                        url="https://t.me/PhantomProjects",
                         ),
                 ],
                 [
                     InlineKeyboardButton(
                         text="🧬Group🚦",
-                        url="https://t.me/IndianBotsChat",
+                        url="https://t.me/PhantomProjectsGroup",
                     ),
                 ]
             ])
         )
-    app.send_message(
+    await app.send_message(
         message.chat.id,
         "My Source Code Can be Found On Github...\n"
         "https://github.com/BLUE-DEVIL1134/AudioExtractorBot"
@@ -240,71 +240,71 @@ def source_or_github(_, message):
 
 
 @app.on_message(filters.command("commands"))
-def commands(_, message):
-    userjoinStatus = checkUserJoinStatus(message.from_user.id)
+async def _commands(_, message):
+    userjoinStatus = await checkUserJoinStatus(message.from_user.id)
     if not userjoinStatus:
-        return app.send_message(
+        return await app.send_message(
             message.chat.id,
             f"Sorry `{message.from_user.first_name}`,\n"
             f"I can't let you use me until you join both my **Channel** and **Group**.",
-            parse_mode="md",
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
                         text="🖥Channel💺",
-                        url="https://t.me/IndianBots",
+                        url="https://t.me/PhantomProjects",
                         ),
                 ],
                 [
                     InlineKeyboardButton(
                         text="🧬Group🚦",
-                        url="https://t.me/IndianBotsChat",
+                        url="https://t.me/PhantomProjectsGroup",
                     ),
                 ]
             ])
         )
-    app.send_message(
+    await app.send_message(
         message.chat.id,
         "List of all Commands are given below -\n"
         "\n"
-        "/help - Show this message\n"
         "/commands - Show this message\n"
         "/start - Restart/Refresh the bot\n"
+        "/github - Get the source code of this bot\n"
         "/help - Get help on how to use me.",
-        parse_mode="md",
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 
 @app.on_message(filters.command("help"))
-def commands(_, message):
-    userjoinStatus = checkUserJoinStatus(message.from_user.id)
+async def _help(_, message):
+    userjoinStatus = await checkUserJoinStatus(message.from_user.id)
     if not userjoinStatus:
-        return app.send_message(
+        return await app.send_message(
             message.chat.id,
             f"Sorry `{message.from_user.first_name}`,\n"
             f"I can't let you use me until you join both my **Channel** and **Group**.",
-            parse_mode="md",
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
                         text="🖥Channel💺",
-                        url="https://t.me/IndianBots",
+                        url="https://t.me/PhantomProjects",
                         ),
                 ],
                 [
                     InlineKeyboardButton(
                         text="🧬Group🚦",
-                        url="https://t.me/IndianBotsChat",
+                        url="https://t.me/PhantomProjectsGroup",
                     ),
                 ]
             ])
         )
-    app.send_message(
+    await app.send_message(
         message.chat.id,
         "It's real **easy** to use me.\n"
         "All you need to do is send me a **video file** and i will **extract the audio** "
         "and send it to you.",
-        parse_mode="md",
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 

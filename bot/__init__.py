@@ -15,8 +15,9 @@ r"""
                 | |_) || (_) || |_
                 |____/  \___/  \__|
 
-telegramChannel - t.me/IndianBots
+telegramChannel - telegram.dog/PhantomProjects
 initialRelease - 21/06/21
+relaunchDate - 3/5/23
 """
 
-__version__ = 1.0
+__version__ = 2.0
