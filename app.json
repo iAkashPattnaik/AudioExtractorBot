@@ -1,0 +1,32 @@
+{
+    "name": "AudioExtractorBot",
+    "description": "A simple bot made in python to extract audio from videos.",
+    "keywords": ["FFmpeg", "pyrogram", "python"],
+    "repository": "https://github.com/BLUE-DEVIL1134/AudioExtractorBot",
+    "success_url": "https://github.com/BLUE-DEVIL1134/AudioExtractorBot",
+    "env": {
+      "botToken": {
+        "description": "Telegram bot token.",
+        "value": "",
+        "required": true
+      },
+      "apiId": {
+        "description": "Telegram apiId",
+        "value": "",
+        "required": true
+      },
+      "apihash": {
+        "description": "Telegram apiHash.",
+        "value": "",
+        "required": true
+      }
+    },
+    "buildpacks": [
+      {
+        "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
+      },
+      {
+        "url": "heroku/python"
+      }
+    ]
+}
